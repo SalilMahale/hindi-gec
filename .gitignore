@@ -1,0 +1,11 @@
+# data and checkpoints are rebuilt by the scripts, never committed
+data/raw/
+data/processed/
+data/synthetic/
+models/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/

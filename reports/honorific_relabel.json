@@ -1,0 +1,82 @@
+{
+ "generated_by": ".venv\\Scripts\\python.exe scripts\\11_build_gazetteer.py",
+ "gazetteer_size": 4802,
+ "gazetteer_size_train_only": 4616,
+ "before": {
+  "edits": 1133,
+  "agree": 1000,
+  "rate": 0.8826,
+  "hon_as_num": 133,
+  "num_as_hon": 0,
+  "unmatched": 0,
+  "by_gold": {
+   "AGR-HON": {
+    "edits": 401,
+    "agree": 268
+   },
+   "AGR-NUM": {
+    "edits": 732,
+    "agree": 732
+   }
+  }
+ },
+ "after": {
+  "edits": 1133,
+  "agree": 1054,
+  "rate": 0.9303,
+  "hon_as_num": 57,
+  "num_as_hon": 22,
+  "unmatched": 0,
+  "by_gold": {
+   "AGR-HON": {
+    "edits": 401,
+    "agree": 344
+   },
+   "AGR-NUM": {
+    "edits": 732,
+    "agree": 710
+   }
+  }
+ },
+ "deploy": {
+  "edits": 1133,
+  "agree": 1067,
+  "rate": 0.9417,
+  "hon_as_num": 42,
+  "num_as_hon": 24,
+  "unmatched": 0,
+  "by_gold": {
+   "AGR-HON": {
+    "edits": 401,
+    "agree": 359
+   },
+   "AGR-NUM": {
+    "edits": 732,
+    "agree": 708
+   }
+  }
+ },
+ "title": {
+  "edits": 1133,
+  "agree": 1133,
+  "rate": 1.0,
+  "hon_as_num": 0,
+  "num_as_hon": 0,
+  "unmatched": 0,
+  "by_gold": {
+   "AGR-HON": {
+    "edits": 401,
+    "agree": 401
+   },
+   "AGR-NUM": {
+    "edits": 732,
+    "agree": 732
+   }
+  }
+ },
+ "test_sentence": {
+  "sentence": "लाल बहादुर शास्त्री एक अद्भुत इंसान था ।",
+  "before": "AGR-NUM",
+  "after": "AGR-HON"
+ }
+}

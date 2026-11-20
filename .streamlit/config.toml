@@ -1,0 +1,21 @@
+# Demo-day settings: no first-run email prompt, no usage telemetry (no network),
+# fixed port. Open http://localhost:8501 in the browser.
+[server]
+headless = true
+port = 8501
+
+[client]
+toolbarMode = "viewer"                  # hide the developer menu (rerun, settings, deploy)
+
+[browser]
+gatherUsageStats = false
+
+# Light, academic theme (SCALE_UP Phase A). One accent colour; the per-error-type
+# colours live in app/ui.py and app/style.css. Fonts are system fonts only (offline).
+[theme]
+base = "light"
+primaryColor = "#3730A3"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F5F9"
+textColor = "#1F2433"
+font = "sans serif"

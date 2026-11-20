@@ -1,0 +1,52 @@
+# =====================================================================
+# Hindi GEC - pinned dependencies
+# Target machine: Windows 11, Python 3.14 (cp314), RTX 4060 8 GB
+#
+# INSTALL (inside an activated venv, from the repo root):
+#     pip install -r requirements.txt
+#     pip install -e .
+#
+# Verify CUDA before anything else:
+#     python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+#     -> must print something like: 2.14.0+cu126 True
+#
+# The extra index below is what makes pip fetch the CUDA build. Plain
+# `pip install torch` on Windows pulls the CPU-only wheel from PyPI, which
+# imports fine but raises "Torch not compiled with CUDA enabled" the moment
+# you touch the GPU.
+#
+# transformers is deliberately held at the 4.x line: IndicBART ships a
+# SentencePiece/Albert-style SLOW tokenizer, and the 5.x major release
+# changes tokenizer and Trainer APIs in ways this project has not verified.
+# =====================================================================
+
+--extra-index-url https://download.pytorch.org/whl/cu126
+
+torch==2.14.0+cu126
+
+# --- modelling -------------------------------------------------------
+transformers==4.57.6
+sentencepiece==0.2.2
+accelerate==1.15.0
+datasets==4.6.0
+
+# --- Hindi NLP -------------------------------------------------------
+indic-nlp-library==0.92
+stanza==1.14.0
+
+# --- classical baseline & metrics ------------------------------------
+nltk==3.10.3
+scikit-learn==1.9.1
+
+# --- data handling ---------------------------------------------------
+numpy==2.3.5
+pandas==2.3.3
+PyYAML==6.0.3
+requests==2.34.2
+tqdm==4.70.1
+
+# --- demo ------------------------------------------------------------
+streamlit==1.63.0
+
+# --- development -----------------------------------------------------
+pytest==9.1.1

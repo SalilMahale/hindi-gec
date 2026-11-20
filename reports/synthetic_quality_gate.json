@@ -1,0 +1,37 @@
+{
+  "pairs": 80749,
+  "edits": 81894,
+  "noop": 0,
+  "duplicates": 0,
+  "bad_spans": 0,
+  "type_counts": {
+    "SPELL": 15318,
+    "PRON": 14557,
+    "AGR-NUM": 14494,
+    "POSTP": 13503,
+    "AGR-HON": 7904,
+    "AGR-GEN": 5267,
+    "ERG": 4139,
+    "AUX": 6712
+  },
+  "type_shares": {
+    "AGR-GEN": 0.06431484602046549,
+    "AGR-NUM": 0.17698488289740397,
+    "AGR-HON": 0.096515007204435,
+    "POSTP": 0.16488387427650378,
+    "ERG": 0.050540943170439834,
+    "AUX": 0.08195960632036535,
+    "SPELL": 0.18704667008572057,
+    "PRON": 0.17775417002466604
+  },
+  "type_ok": true,
+  "none_share": 0.19814486866710423,
+  "none_ok": true,
+  "page_leak": 0,
+  "errors_per_pair": {
+    "0": 16000,
+    "2": 17145,
+    "1": 47604
+  },
+  "passed": true
+}

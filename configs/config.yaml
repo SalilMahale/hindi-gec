@@ -1,0 +1,268 @@
+# =====================================================================
+# Hindi GEC (biography domain) - central configuration
+# Every value here is traceable to a section of PROJECT_PLAN.md.
+# Paths are relative to the repository root.
+# =====================================================================
+
+seed: 42                                  # PLAN §7: seeds fixed everywhere
+
+# ---------------------------------------------------------------------
+# The error taxonomy contract (PLAN §1.2). Order is fixed; label ids in
+# the detector are derived from it, so changing the order invalidates a
+# saved checkpoint.
+# ---------------------------------------------------------------------
+error_types: ["AGR-GEN", "AGR-NUM", "AGR-HON", "POSTP", "ERG", "AUX", "SPELL"]
+
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  data_synthetic: "data/synthetic"
+  models: "models"
+  reports: "reports"
+  cache_wiki: "data/raw/wiki_cache"
+  hiwiked_src: "data/raw/hiwiki.extracted.clean.src"
+  hiwiked_trg: "data/raw/hiwiki.extracted.clean.trg"
+  hiwiked_csv: "data/processed/hindi_gec_preprocessed.csv"
+  bio_clean: "data/processed/bio_clean.jsonl"
+  hiwiked_bio: "data/processed/hiwiked_bio.jsonl"
+  gold200: "data/processed/hiwiked_bio_gold200.jsonl"
+  bio_synthetic: "data/synthetic/bio_synthetic.jsonl"   # scripts/03_generate_synthetic.py
+  dev_split: "data/processed/hiwiked_dev_split.json"   # HiWikEd dev -> dev_train / dev_select (scripts/14_prepare_dev.py)
+  model: "models/corrector"                 # THE corrector: weights, tokenizer, train_summary.json
+  corrector_run: "models/corrector_run"     # 04_train_corrector.py writes here (checkpoint, log, final/); copy final/ to model
+  predictions: "reports/predictions"        # saved outputs; final test: final_test_corrector.jsonl, final_test_baseline_A.jsonl
+  baseline_lm: "models/baseline_A_4gram.pkl"   # System A LM (scripts/16_baseline_A.py)
+  results_final: "reports/results_final.json"  # scripts/19_phase_e.py; the Insights page reads it
+  # Web app: every number on screen comes from these files.
+  app_stats: "reports/app_stats.json"            # written by scripts/09_app_stats.py
+  app_examples: "reports/app_examples.json"      # example chips, one per type; scripts/10_app_examples.py
+  demo_sentence_bank: "reports/demo_sentence_bank.txt"   # correct sentences the demo model must leave unchanged
+  pipeline_figure: "app/assets/pipeline.png"
+  name_gazetteer: "data/processed/name_gazetteer.txt"   # person-name tokens; scripts/11_build_gazetteer.py
+
+# ---------------------------------------------------------------------
+# Web app
+# ---------------------------------------------------------------------
+app:
+  # Edit confidence below this -> dashed "suggestion". Plan said 0.80; per-edit confidence (mean subword
+  # probability, label-smoothed model) runs lower, and on synthetic val 0.80 flagged 25.4 % of right edits.
+  # 0.60 flags 8.4 % of right and 44.3 % of wrong edits (measured on synthetic val during development).
+  suggestion_below: 0.60
+  paragraph_batch_size: 16                # sentences per GPU batch in paragraph mode
+  example_max_tokens: 14                  # example chips stay short enough to read on a projector
+  num_alternatives: 3                     # beams returned; beams 2-3 shown as "other possible corrections"
+  model_label: "IndicBART corrector"      # the one name the app uses for the model
+
+# Person-name gazetteer: honorific vs ordinary plural
+names:
+  max_common_rank: 300                    # a title word among the 300 most frequent corpus words is vocabulary ...
+  keep_if_titles: 20                      # ... unless it is in >= 20 titles (सिंह, कुमार, शर्मा, गांधी)
+
+# ---------------------------------------------------------------------
+# Preprocessing of the HiWikEd parallel pairs (existing script defaults)
+# ---------------------------------------------------------------------
+preprocessing:
+  min_tokens: 3
+  max_tokens: 60
+
+# ---------------------------------------------------------------------
+# Clean domain corpus from Hindi Wikipedia (PLAN §2.2)
+# ---------------------------------------------------------------------
+corpus:
+  api_url: "https://hi.wikipedia.org/w/api.php"
+  user_agent: "HindiGEC-StudentProject/0.1 (iamsalilmahale@gmail.com)"
+  max_requests_per_second: 4        # PLAN caps at 5; 4 leaves headroom before 429
+  max_retries: 8
+  subcategory_depth: 1
+  target_sentences: 40000
+  categories:
+    - "भारतीय स्वतंत्रता सेनानी"
+    - "भारतीय वैज्ञानिक"
+    - "भारतीय राजनीतिज्ञ"
+    - "हिन्दी साहित्यकार"
+    - "भारतीय अभिनेता"
+    - "हिंदी सिनेमा की अभिनेत्रियाँ"
+    - "भारतीय महिला वैज्ञानिक"
+    - "भारतीय क्रिकेट खिलाड़ी"
+    - "भारत रत्न सम्मान प्राप्तकर्ता"
+    - "पद्म भूषण"
+  keep_sections: ["जीवन", "प्रारंभिक जीवन", "प्रारम्भिक जीवन", "शिक्षा", "करियर"]
+  quality_filters:                        # PLAN §2.2
+    min_tokens: 6
+    max_tokens: 40
+    min_devanagari_ratio: 0.80
+    must_end_in_danda: true
+    reject_unbalanced_brackets: true
+    reject_citation_markers: true
+    reject_leading_bullet: true
+  dedup:
+    shingle_size: 4
+    near_dup_threshold: 0.90
+
+# ---------------------------------------------------------------------
+# Filtering HiWikEd down to biography sentences (PLAN §2.3)
+# ---------------------------------------------------------------------
+domain_filter:
+  threshold: 2
+  min_pairs_required: 1000
+  year_range: [1800, 2026]
+  life_event_keywords:
+    ["जन्म", "जन्मे", "जन्मी", "निधन", "मृत्यु", "पुत्र", "पुत्री", "पिता",
+     "माता", "पत्नी", "पति", "विवाह", "शिक्षा", "स्नातक", "स्नातकोत्तर",
+     "पुरस्कार", "सम्मानित", "सम्मान", "प्रोफेसर", "कार्यकाल", "नियुक्त",
+     "प्रसिद्ध", "ज्ञात", "सदस्य", "संस्थापक"]
+  honorific_pronouns: ["उन्होंने", "उनका", "उनकी", "उनके", "इन्होंने"]
+
+# ---------------------------------------------------------------------
+# Splits (PLAN §2.4) - real errors are precious, so test is the larger half
+# ---------------------------------------------------------------------
+splits:
+  hiwiked_bio: {dev: 0.40, test: 0.60}
+  hiwiked_dev: {dev_train: 0.75, dev_select: 0.25}   # real pairs for training / model selection
+  dev_train_upsample: 5                   # each dev_train pair appears 5x in training
+  # Salil 2026-10-22: drop a dev_train pair if its source OR target token-set Jaccard with any
+  # dev_select or test pair is >= this (hindi_gec.leakage; scripts/14_prepare_dev.py).
+  dev_train_near_dup_jaccard: 0.8
+  synthetic:   {train: 0.95, val: 0.05}
+  gold_size: 200
+  group_by: "page_title"                  # no biography leaks across splits
+
+# ---------------------------------------------------------------------
+# Synthetic error generator (PLAN §3.2, §3.3)
+# ---------------------------------------------------------------------
+generator:
+  target_pairs: 80000                     # Salil 2026-10-22: ~80k pairs, 20 % clean
+  p_clean: 0.20                           # emitted as NONE, teaches "no error"
+  errors_per_sentence: {1: 0.75, 2: 0.25}
+  # Type shares (must sum to 1.0; the 7 ⛔ types + PRON).
+  # ⛔ PLAN §3.3 escape hatch (2026-10-08, option a): the 7 original shares were measured on
+  # hiwiked_bio and scaled by 0.95, ERG held at 0.05 (0 real ERG edits, but the demo must handle ने):
+  # AGR-NUM .231 AGR-GEN .0831 POSTP .2152 SPELL .1785 AGR-HON .1254 AUX .1168 ERG .05.
+  # PRON (2026-10-22) = its share of dev edits in the extended taxonomy: 165 PRON-like OTHER edits
+  # (PRON-HON 138 + POSS-AGR 27) / (760 in-taxonomy + 165) = 0.1784 (scripts/13_other_patterns.py, dev only).
+  # ERG 0.05 and SPELL 0.1785 kept; the other five scaled by (1 - .05 - .1785 - .1784) / .7715.
+  type_distribution:
+    AGR-NUM: 0.1776
+    AGR-GEN: 0.0639
+    POSTP:   0.1654
+    SPELL:   0.1785
+    AGR-HON: 0.0964
+    AUX:     0.0898
+    ERG:     0.05
+    PRON:    0.1784
+  redistribute_if_real_differs_by: 0.10   # §3.3 escape hatch
+  # POSTP substitution weights (PLAN §3.1 item 6): में/पर/से most confusable.
+  postp_confusion:
+    में: {पर: 0.40, से: 0.35, को: 0.15, तक: 0.10}
+    पर:  {में: 0.50, से: 0.30, को: 0.20}
+    से:  {में: 0.45, पर: 0.25, को: 0.20, तक: 0.10}
+    को:  {में: 0.35, से: 0.35, पर: 0.30}
+    तक:  {से: 0.60, में: 0.40}
+  genitive_swaps: true                    # का/की/के swaps, typed POSTP
+  genitive_confusion:                     # only swaps that are always wrong; के->का only
+    का: {की: 1.0}                          # before a compound-postposition head (के बाद)
+    की: {का: 0.6, के: 0.4}
+    के: {की: 0.6, का: 0.4}
+  # A SPELL variant seen >= this many times in bio_clean is a legitimate
+  # spelling (गांव/गाँव, जिला/ज़िला), so it is not used as an error.
+  spell_veto_min_count: 2
+  spell_min_word_count: 5                 # do not misspell words seen < 5 times (names, rare words)
+  spell_veto_ratio: 0.05                  # veto a variant only if >= 5 % as frequent as the word
+  pron_swaps: true                        # type PRON (honorific pronoun -> singular, possessive endings)
+  forced_spell: {"उन्होंने": "उन्होने"}     # right -> wrong; 76 of 145 real dev SPELL edits (reports/other_patterns_dev.json)
+  normalise_forced_targets: true          # corpus "उन्होने" (402x) fixed in targets; originals become real pairs
+  # Forced pairs sit OUTSIDE the type quota, on top of the ordinary SPELL share (Salil 2026-10-22):
+  # drawing them inside SPELL left too few ordinary misspellings (SPELL F0.5 0.762 -> 0.589 in an earlier run).
+  forced_spell_on_top: true
+  forced_spell_pairs: 749
+  type_share_tolerance: 0.02              # gate: each type within ±2 points
+  max_passes: 12                          # passes over the corpus per split
+  quality_gate:
+    max_noop_pairs: 0
+    max_duplicate_pairs: 0
+    manual_sample_size: 100
+    manual_pass_threshold: 90
+
+# ---------------------------------------------------------------------
+# System A - rule + n-gram baseline (PLAN §4.1)
+# ---------------------------------------------------------------------
+baseline:
+  stanza_lang: "hi"
+  stanza_processors: "tokenize,pos,lemma,depparse"
+  ngram_order: 5
+  smoothing: "kneser_ney"
+  postposition_flag_ratio: 0.10           # flag if p(obs) < 0.1 * p(best)
+  # What was built (the Stanza / 5-gram KN plan above was cut on 2026-10-08):
+  # rule candidates + 4-gram stupid-backoff LM, greedy, margin tuned on HiWikEd dev_select.
+  a_lm_order: 4
+  a_backoff_alpha: 0.4                    # Brants et al. 2007
+  a_max_changes: 2
+  a_spell_min_count: 5                    # spelling candidate must be seen >= 5 times and > 2x the word
+  a_margins: [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0]   # log-score gain thresholds tried
+
+# ---------------------------------------------------------------------
+# System B - neural detector (PLAN §4.2)
+# ---------------------------------------------------------------------
+detector:
+  model_name: "google/muril-base-cased"
+  max_len: 64
+  batch_size: 32
+  grad_accum: 1
+  fp16: true
+  lr: 3.0e-5
+  epochs: 3
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  class_weighted_loss: true
+  target_token_f1: 0.85                   # Phase 7 done-when
+
+# ---------------------------------------------------------------------
+# System C - neural corrector (PLAN §4.3)
+# ---------------------------------------------------------------------
+corrector:
+  model_name: "ai4bharat/IndicBART"
+  lang_tag: "<2hi>"
+  max_source_len: 64
+  max_target_len: 64
+  batch_size: 16
+  grad_accum: 2
+  precision: "bf16"                       # fp16 overflows: encoder activations reach ~540k > 65504 (fp16 max); measured 2026-10-08
+  lr: 5.0e-5
+  epochs: 4                               # ≈ 49 min on the RTX 4060 (inside the 60-min budget)
+  label_smoothing: 0.1
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  save_every_steps: 1000                  # resumable checkpoint
+  log_every_steps: 25
+  gradient_checkpointing: false
+  num_beams: 5
+  hallucination_guard:                    # PLAN §4.3 - precision saver
+    max_token_edits: 3
+    max_edit_ratio: 0.25
+  extended_types: true                    # type edits with PRON (the model is trained on 8 types)
+  # Training data: synthetic train + HiWikEd dev_train x splits.dev_train_upsample.
+  # Final run: 10 108 steps in 2 956 s (3.42 steps/s), val loss 0.1131 (models/corrector/train_summary.json).
+  oom_fallback:                           # PLAN §9 risk register
+    batch_size: 8
+    grad_accum: 4
+    max_len: 48
+    gradient_checkpointing: true
+
+# ---------------------------------------------------------------------
+# Evaluation (PLAN §5)
+# ---------------------------------------------------------------------
+evaluation:
+  beta: 0.5                               # F0.5: precision weighted
+  gleu_n: 4
+  # Evaluation extras (scripts/19_phase_e.py)
+  latency_sentences: 100                  # dev_select sources, full pipeline (beams, confidence, explanations)
+  latency_batch: 16
+  latency_repeats: 3                      # each setting timed 3x over the 100 sentences (after 5 warm-up calls)
+  error_analysis_n: 20                    # random real-test failures, after the final test
+  headline_set: "gold200"
+  report_sets: ["synthetic_val", "hiwiked_bio_test", "gold200"]
+  success_criteria:
+    min_f05_gain_over_baseline: 0.10
+    min_precision: 0.60
+    min_agreement_type_f05: 0.60

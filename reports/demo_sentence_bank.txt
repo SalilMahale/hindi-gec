@@ -1,0 +1,7 @@
+# Correct sentences (synthetic val, no error) the IndicBART corrector leaves unchanged.
+# Written by scripts/10_app_examples.py, which re-checks them on every run.
+उनके द्वारा रचित ग्रहलाघव प्रसिद्ध ग्रन्थ है ।
+बाबू रामकृष्ण वर्मा का जन्म बनारस में हुआ था ।
+वे सन 1978 से सन 1988 तक टाइम्स ऑफ इण्डिया के सम्पादक थे ।
+वो भारतीय राष्ट्रीय कांग्रेस के नेता हैं ।
+इसके बाद उर्मिला छत्तीसगढ़ राज्य की पहली विधानसभा की सदस्य बनीं ।

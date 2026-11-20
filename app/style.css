@@ -1,0 +1,157 @@
+/* Hindi GEC web app - one stylesheet, injected once by ui.inject_css().
+   Offline: system fonts only, no @import, no url(). */
+
+:root {
+  --font: "Segoe UI", "Nirmala UI", "Noto Sans Devanagari", "Mangal", system-ui, sans-serif;
+  --deva: "Nirmala UI", "Noto Sans Devanagari", "Mangal", "Segoe UI", sans-serif;
+  --accent: #3730A3;
+  --accent-soft: #EEF0FB;
+  --ink: #1F2433;
+  --ink-2: #4B5163;
+  --muted: #7A8094;
+  --line: #E3E5EC;
+  --canvas: #F4F5F9;
+  --card: #FFFFFF;
+  --ok: #1E7A46;
+  --ok-soft: #EAF6EF;
+  --warn: #8A5A00;
+  --warn-soft: #FFF6E0;
+  --radius: 14px;
+}
+
+/* ---- base ---------------------------------------------------------- */
+html, body, .stApp, .stApp p, .stApp li, .stApp label, .stApp td, .stApp th,
+.stApp textarea, .stApp input, .stApp button, .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
+  font-family: var(--font);
+}
+.stApp { background: var(--canvas); }
+.block-container { padding-top: 2.2rem; max-width: 1180px; }
+.stApp h1, .stApp h2, .stApp h3 { color: var(--ink); letter-spacing: -0.01em; }
+
+/* big Devanagari in the editor */
+.stTextArea textarea {
+  font-family: var(--deva) !important;
+  font-size: 22px !important;
+  line-height: 1.7 !important;
+  border-radius: 12px !important;
+}
+/* copy box: the corrected text, same font as the result */
+[data-testid="stCode"] pre, [data-testid="stCode"] code {
+  font-family: var(--deva) !important;
+  font-size: 18px !important;
+  white-space: pre-wrap !important;
+}
+
+/* ---- header band --------------------------------------------------- */
+.band {
+  background: linear-gradient(135deg, #312A8F 0%, #3730A3 55%, #4A43B8 100%);
+  color: #fff; border-radius: 18px; padding: 26px 30px 22px; margin-bottom: 18px;
+}
+.band h1 { color: #fff !important; font-size: 30px; margin: 0 0 2px; padding: 0; font-weight: 700; }
+.band .hi { font-family: var(--deva); font-size: 22px; opacity: .92; margin-bottom: 6px; }
+.band .sub { color: #D9DBF7; font-size: 15.5px; margin: 6px 0 14px; max-width: 760px; }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat {
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px; padding: 6px 14px; font-size: 14px; color: #fff;
+}
+.stat b { font-size: 16px; margin-right: 4px; }
+
+/* ---- cards --------------------------------------------------------- */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; box-shadow: 0 1px 2px rgba(20, 24, 40, .04);
+}
+.card + .card { margin-top: 12px; }
+.card .label {
+  font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.placeholder { color: var(--muted); font-size: 15.5px; min-height: 120px; display: flex; align-items: center; }
+.meta { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+/* ---- sentences and the inline diff ---------------------------------- */
+.sent { font-family: var(--deva); font-size: 24px; line-height: 2.1; color: var(--ink); }
+.sent.small { font-size: 21px; line-height: 2; }
+.edit { position: relative; white-space: nowrap; border-radius: 8px; padding: 2px 6px; background: color-mix(in srgb, var(--c) 12%, white); cursor: help; }
+.edit del { color: var(--ink-2); text-decoration: line-through; text-decoration-color: var(--c); text-decoration-thickness: 2.5px; }
+.edit ins { text-decoration: none; font-weight: 700; color: var(--ink); border-bottom: 3px solid var(--c); padding-bottom: 1px; }
+.edit .arrow { color: var(--muted); font-size: .7em; margin: 0 3px; }
+.edit.sugg { background: transparent; outline: 2px dashed var(--c); outline-offset: -1px; }
+.edit.sugg ins { border-bottom-style: dashed; }
+/* hover tooltip: type + explanation */
+.edit[data-tip]:hover::after {
+  content: attr(data-tip); position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 20;
+  background: #1F2433; color: #fff; font-family: var(--font); font-size: 13.5px; line-height: 1.45;
+  font-weight: 400; padding: 8px 11px; border-radius: 8px; white-space: pre-line; width: max-content; max-width: 340px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+
+/* ---- type chips and legend ---------------------------------------- */
+.tchip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+  color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px 3px 8px;
+  white-space: nowrap;
+}
+.tchip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.tchip.sugg { border-style: dashed; border-color: var(--c); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---- edits table --------------------------------------------------- */
+table.edits { width: 100%; border-collapse: collapse; font-size: 15px; }
+table.edits th {
+  text-align: left; font-size: 12.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line);
+}
+table.edits td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; color: var(--ink); }
+table.edits tr:last-child td { border-bottom: none; }
+table.edits .w { font-family: var(--deva); font-size: 20px; color: var(--ink-2); text-decoration: line-through; text-decoration-color: var(--c); text-decoration-thickness: 2px; }
+table.edits .r { font-family: var(--deva); font-size: 20px; font-weight: 700; }
+table.edits .why { color: var(--ink-2); font-size: 14.5px; line-height: 1.5; }
+table.edits .why .hi { font-family: var(--deva); font-size: 15.5px; color: var(--ink); }
+.conf { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.conf .bar { flex: 1; height: 6px; background: var(--canvas); border-radius: 999px; overflow: hidden; }
+.conf .bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.conf.low .bar span { background: repeating-linear-gradient(90deg, var(--muted) 0 6px, transparent 6px 9px); }
+.conf .v { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; width: 34px; }
+
+/* ---- status messages ----------------------------------------------- */
+.okbox { background: var(--ok-soft); border: 1px solid #BFE3CD; border-radius: var(--radius); padding: 16px 18px; color: var(--ok); }
+.okbox .t { font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+.okbox .hi { font-family: var(--deva); font-size: 18px; }
+.okbox .scope { color: #2F5D44; font-size: 14px; margin-top: 8px; line-height: 1.5; }
+.warnbox { background: var(--warn-soft); border: 1px solid #F0D79B; border-radius: var(--radius); padding: 12px 16px; color: var(--warn); font-size: 14.5px; margin-top: 12px; }
+.warnbox .sent { font-size: 18px; line-height: 1.7; color: var(--ink-2); }
+
+/* ---- paragraph summary bar ----------------------------------------- */
+.sumrow { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; min-width: 150px; }
+.tile .n { font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .k { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.stack { display: flex; gap: 2px; height: 12px; border-radius: 999px; overflow: hidden; margin: 10px 0 8px; background: var(--canvas); }
+.stack span { background: var(--c); }
+.stack span:first-child { border-radius: 999px 0 0 999px; }
+.stack span:last-child { border-radius: 0 999px 999px 0; }
+
+/* ---- insights / about tables ---------------------------------------- */
+table.grid { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--card); }
+table.grid th { text-align: left; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 9px 12px; border-bottom: 1px solid var(--line); }
+table.grid td { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--ink); font-variant-numeric: tabular-nums; }
+table.grid tr:last-child td { border-bottom: none; }
+table.grid td.num, table.grid th.num { text-align: right; }
+table.grid td.best { font-weight: 700; color: var(--accent); }
+table.grid .deva { font-family: var(--deva); font-size: 17px; }
+.note { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin-top: 8px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 8px; }
+.kpis .tile { min-width: 0; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lim li { margin-bottom: 6px; color: var(--ink-2); }
+
+/* ---- Streamlit chrome ------------------------------------------------ */
+header[data-testid="stHeader"] { background: transparent; }
+.stAppDeployButton, [data-testid="stAppDeployButton"] { display: none !important; }
+/* example chips wrap onto several lines instead of scrolling sideways */
+[data-testid="stButtonGroup"], [data-testid="stButtonGroup"] > div, [data-testid="stButtonGroup"] div[role="radiogroup"],
+[data-testid="stButtonGroup"] div[role="group"] { flex-wrap: wrap !important; overflow: visible !important; }
+[data-testid="stButtonGroup"] button p { font-family: var(--deva); font-size: 15px; }.card-label { font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 6px 0 -6px; }.alt + .alt { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
+.alt .meta { margin-top: 2px; }
